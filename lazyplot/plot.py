@@ -141,7 +141,7 @@ def plot_ax(ax: Axes, info: DrawInfo):
                 _color = info.color[i % len(info.color)]
                 _linestyle = info.line_style[(i // len(info.color)) % len(info.line_style)]
                 _t = np.arange(len(y)) if info.t is None else info.t
-                _label = f"graph {i+1}" if info.label is None else info.label[i]
+                _label = f"graph {i+1}" if info.labels is None else info.labels[i]
                 ax.plot(_t, y, label=_label, color=_color, alpha=info.alpha,
                         linewidth=info.linewidth, linestyle=_linestyle)
         #---------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ def plot_ax(ax: Axes, info: DrawInfo):
         case "bar":
             if info.y.ndim != 1:
                 raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"bar\" require (N) data")
-            label = [f"data {i + 1}" for i in range(len(info.y))] if info.label is None else info.label
+            label = [f"data {i + 1}" for i in range(len(info.y))] if info.labels is None else info.labels
             color = [info.color[i % len(info.color)] for i in range(len(info.y))]
             ax.bar(label, info.y, color=color)
             
@@ -163,7 +163,7 @@ def plot_ax(ax: Axes, info: DrawInfo):
                 raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"boxplot\" require (M, N) data")
             
             #plot--------------------
-            label = [f"data {i + 1}" for i in range(len(info.y))] if info.label is None else info.label
+            label = [f"data {i + 1}" for i in range(len(info.y))] if info.labels is None else info.labels
             color = [info.color[i & len(info.color)] for i in range(len(info.y))]
             bplot = ax.boxplot(info.y.T, labels=label, patch_artist=True, medianprops=dict(color="white", linewidth=3))
             #paint facecolor
@@ -186,7 +186,7 @@ def plot_ax(ax: Axes, info: DrawInfo):
             for i, y in enumerate(info.y):
                 _color = info.color[i % len(info.color)]
                 _markerstyle = info.marker_style[(i // len(info.color)) % len(info.marker_style)]
-                _label = f"graph {i+1}" if info.label is None else info.label[i]
+                _label = f"graph {i+1}" if info.labels is None else info.labels[i]
                 ax.scatter(y[0], y[1], label=_label, color=_color, alpha=info.alpha,
                         linewidth=info.linewidth, marker=_markerstyle)
         #--------------------------------------------------------------------------------    
@@ -206,7 +206,7 @@ def plot_ax(ax: Axes, info: DrawInfo):
     
     
     # ax setting --------------------------------------
-    if info.title:
+    if info.title is not None:
         ax.set_title(info.title)
     ax.set_xlabel(info.x_label)
     ax.set_ylabel(info.y_label)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Literal, Optional
+from typing import Literal
 import numpy as np
 
 FIGURE_LAYOUT = Literal["tight", "constrained"]
@@ -8,9 +8,9 @@ PLOT_TYPE_1D = Literal["plot", "hist", "bar"]
 PLOT_TYPE_2D = Literal["plot", "scatter", "imshow", "boxplot"]
 PLOT_TYPE_3D = Literal["scatter"]
 
-COLOR = Literal['blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black']
-MARKER_STYLE = Literal[',', '.', 'o', 'v', '^', '<', '>', 's', 'p', '*', 'D', 'd']
-LINE_STYLE = Literal['-', '--', '-.', ':']
+COLOR = ['royalblue', 'olivedrab', 'firebrick', 'teal', 'slateblue', 'goldenrod', 'dimgray']
+MARKER_STYLE = [',', '.', 'o', 'v', '^', '<', '>', 's', 'p', '*', 'D', 'd']
+LINE_STYLE = ['-', '--', '-.', ':']
 
 #=========================================================================
 @dataclass
@@ -58,23 +58,22 @@ class PlotConfig:
 class DrawInfo:
     
     y : np.ndarray  # require
-    plot_type: PLOT_TYPE_1D | PLOT_TYPE_2D | PLOT_TYPE_3D   #require    
-    title: str | None = None    #require
+    plot_type: PLOT_TYPE_1D | PLOT_TYPE_2D | PLOT_TYPE_3D   #require
+     
+    title: str | None = None
     
     t : np.ndarray | None = None  
-    label: list[str] | None = None
+    labels: list[str] | None = None
     
     x_label: str = "x" 
     y_label: str = "y"
     x_lim: tuple[float|None, float|None] = (None, None)
     y_lim: tuple[float|None, float|None] = (None, None)
     
-    color: list[COLOR | tuple[int, int, int]] = field(
-        default_factory=lambda: ['royalblue', 'olivedrab', 'firebrick', 'teal', 'slateblue', 'goldenrod', 'dimgray']
-    )
+    color: list[str | tuple[int, int, int]] = field(default_factory=lambda: COLOR)
     alpha: float = 1
-    line_style: list[LINE_STYLE] = field(default_factory=lambda: ['-', '--', '-.', ':'])
-    marker_style: list[MARKER_STYLE] = field(default_factory=lambda: ['o', ',', '.', 'v', '^', '<', '>', 's', 'p', '*', 'D', 'd'])
+    line_style: list[str] = field(default_factory=lambda: LINE_STYLE)
+    marker_style: list[str] = field(default_factory=lambda: MARKER_STYLE)
     linewidth: float = 2.0
     
     aspect: float | Literal["auto"] = "auto"
@@ -86,16 +85,14 @@ class DrawInfo:
             if self.t.shape != self.y.shape:
                 raise ValueError(f"Invalid data. x and y must be same shape")
             
-        if self.label is not None:
-            if self.y.shape[0] != len(self.label):
-                raise ValueError("label must have same length as y")
+        if self.labels is not None:
+            if self.y.shape[0] != len(self.labels):
+                raise ValueError("labels must have same length as y")
         
         if isinstance(self.color, list) is False:
             self.color = [self.color]
-            
         if isinstance(self.line_style, list) is False:
             self.line_style = [self.line_style]
-            
         if isinstance(self.marker_style, list) is False:
             self.marker_style = [self.marker_style]
             
