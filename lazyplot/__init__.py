@@ -1,2 +1,2 @@
 from lazyplot.plot import lazy_plot, custom_plot
-from lazyplot.config import DrawInfo
+from lazyplot.config import DrawConfig

@@ -14,7 +14,7 @@ LINE_STYLE = ['-', '--', '-.', ':']
 
 #=========================================================================
 @dataclass
-class PlotConfig:
+class FigureConfig:
     figsize: tuple[int, int] = (8,8)
     layout: FIGURE_LAYOUT = "constrained"
     linewidth : float = 2.0
@@ -55,7 +55,7 @@ class PlotConfig:
 
 #======================================================================
 @dataclass
-class DrawInfo:
+class DrawConfig:
     
     y : np.ndarray  # require
     plot_type: PLOT_TYPE_1D | PLOT_TYPE_2D | PLOT_TYPE_3D   #require

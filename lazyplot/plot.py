@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
 
-from lazyplot.config import PlotConfig, DrawInfo
+from lazyplot.config import FigureConfig, DrawConfig
 
-GLOBAL_CONFIG = PlotConfig()
+GLOBAL_CONFIG = FigureConfig()
 
 
 #=======================================================================
@@ -40,7 +40,7 @@ def init_figure(num_axes: int, cfg):
     return fig, ax_cols, ax_rows
 
 #=================================================================================
-def custom_plot(draw_info: list[DrawInfo],
+def custom_plot(draw_info: list[DrawConfig],
                 out_path: str = None,
                 user_config: dict | None = None):
     """
@@ -95,7 +95,7 @@ def lazy_plot(input_data: np.ndarray | list[np.ndarray],
     for i, data in enumerate(input_data, 1):
         _title = f'data {i}'
         _ax = fig.add_subplot(ax_rows, ax_cols, i)
-        _draw_info = create_draw_info(data, _title, cfg)
+        _draw_info = create_draw_config(data, _title, cfg)
         
         plot_ax(_ax, _draw_info)
         
@@ -105,7 +105,7 @@ def lazy_plot(input_data: np.ndarray | list[np.ndarray],
     return
         
 #====================================================================================
-def create_draw_info(data: np.ndarray, title: str, cfg: PlotConfig):
+def create_draw_config(data: np.ndarray, title: str, cfg: FigureConfig):
     
     if data.ndim == 1:
         plot_type = cfg.plot_type_1d
@@ -116,13 +116,13 @@ def create_draw_info(data: np.ndarray, title: str, cfg: PlotConfig):
     else:
         raise ValueError("Invalid data dimension. Data is limited to 3 dimensions or less")
     
-    draw_info = DrawInfo(y=data, plot_type=plot_type, title=title, linewidth=cfg.linewidth)
+    draw_info = DrawConfig(y=data, plot_type=plot_type, title=title, linewidth=cfg.linewidth)
     
     return draw_info
 
 
 #=======================================================================================
-def plot_ax(ax: Axes, info: DrawInfo):
+def plot_ax(ax: Axes, info: DrawConfig):
     
     require_legend = False
     
