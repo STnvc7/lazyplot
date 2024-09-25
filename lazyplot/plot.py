@@ -40,14 +40,14 @@ def init_figure(num_axes: int, cfg):
     return fig, ax_cols, ax_rows
 
 #=================================================================================
-def custom_plot(draw_info: list[DrawConfig],
+def custom_plot(draw_config: list[DrawConfig],
                 out_path: str = None,
                 user_config: dict | None = None):
     """
-    Draw more detailed graph by using user-specified DrawInfo
+    Draw more detailed graph by using user-specified DrawConfig
     
     -------input-------
-    draw_info (DrawInfo or list[DrawInfo]) > User-specified DrawInfo
+    draw_config (DrawConfig or list[DrawConfig]) > User-specified DrawConfig
     out_path (str or None) >  Output path of the image file. if None, no image file is output
     user_config (dict) > Value to override PlotConfig.
     
@@ -55,13 +55,13 @@ def custom_plot(draw_info: list[DrawConfig],
     None
     
     """
-    if isinstance(draw_info, list) == False:
-        draw_info = [draw_info]
+    if isinstance(draw_config, list) == False:
+        draw_config = [draw_config]
         
     cfg = generate_local_config(user_config)
-    fig, ax_cols, ax_rows = init_figure(len(draw_info), cfg)
+    fig, ax_cols, ax_rows = init_figure(len(draw_config), cfg)
     
-    for i, data in enumerate(draw_info, 1):
+    for i, data in enumerate(draw_config, 1):
         _ax = fig.add_subplot(ax_rows, ax_cols, i)
         plot_ax(_ax, data)
         
@@ -95,9 +95,9 @@ def lazy_plot(input_data: np.ndarray | list[np.ndarray],
     for i, data in enumerate(input_data, 1):
         _title = f'data {i}'
         _ax = fig.add_subplot(ax_rows, ax_cols, i)
-        _draw_info = create_draw_config(data, _title, cfg)
+        _draw_config = create_draw_config(data, _title, cfg)
         
-        plot_ax(_ax, _draw_info)
+        plot_ax(_ax, _draw_config)
         
     if out_path is not None:
         fig.savefig(out_path, dpi=cfg.dpi)
@@ -116,9 +116,9 @@ def create_draw_config(data: np.ndarray, title: str, cfg: FigureConfig):
     else:
         raise ValueError("Invalid data dimension. Data is limited to 3 dimensions or less")
     
-    draw_info = DrawConfig(y=data, plot_type=plot_type, title=title, linewidth=cfg.linewidth)
+    draw_config = DrawConfig(y=data, plot_type=plot_type, title=title, linewidth=cfg.linewidth)
     
-    return draw_info
+    return draw_config
 
 
 #=======================================================================================
