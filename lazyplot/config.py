@@ -15,14 +15,16 @@ LINE_STYLE = Literal['-', '--', '-.', ':']
 #=========================================================================
 @dataclass
 class PlotConfig:
-    figsize: tuple[int, int] = (3, 4)
+    figsize: tuple[int, int] = (8,8)
     layout: FIGURE_LAYOUT = "constrained"
     linewidth : float = 2.0
     columns: int = 1
     
     plot_type_1d: PLOT_TYPE_1D = "plot"
     plot_type_2d: PLOT_TYPE_2D = "imshow"
-    plot_type_3d: PLOT_TYPE_3D = "plot"
+    plot_type_3d: PLOT_TYPE_3D = "scatter"
+    
+    dpi: float = 100
     
     # validate after initialize--------------------------------
     def __post_init__(self):
@@ -45,7 +47,7 @@ class PlotConfig:
         
         if new_values == None:
             return
-        for key, value in new_values:
+        for key, value in new_values.items():
             self.set_by_key(key, value)
             
         self.validate()
@@ -60,7 +62,6 @@ class DrawInfo:
     title: str | None = None    #require
     
     t : np.ndarray | None = None  
-    X : np.ndarray | None = None    # array for scatter
     label: list[str] | None = None
     
     x_label: str = "x" 
@@ -69,11 +70,11 @@ class DrawInfo:
     y_lim: tuple[float|None, float|None] = (None, None)
     
     color: list[COLOR | tuple[int, int, int]] = field(
-        default_factory=lambda: ['blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black']
+        default_factory=lambda: ['royalblue', 'olivedrab', 'firebrick', 'teal', 'slateblue', 'goldenrod', 'dimgray']
     )
     alpha: float = 1
-    linestyle: list[LINE_STYLE] = field(default_factory=lambda: ['-', '--', '-.', ':'])
-    marker: MARKER_STYLE | None = None
+    line_style: list[LINE_STYLE] = field(default_factory=lambda: ['-', '--', '-.', ':'])
+    marker_style: list[MARKER_STYLE] = field(default_factory=lambda: ['o', ',', '.', 'v', '^', '<', '>', 's', 'p', '*', 'D', 'd'])
     linewidth: float = 2.0
     
     aspect: float | Literal["auto"] = "auto"
@@ -92,6 +93,9 @@ class DrawInfo:
         if isinstance(self.color, list) is False:
             self.color = [self.color]
             
-        if isinstance(self.linestyle, list) is False:
-            self.linestyle = [self.linestyle]
+        if isinstance(self.line_style, list) is False:
+            self.line_style = [self.line_style]
+            
+        if isinstance(self.marker_style, list) is False:
+            self.marker_style = [self.marker_style]
             
