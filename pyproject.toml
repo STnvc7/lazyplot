@@ -1,6 +1,6 @@
 [project]
 name = "lazyplot"
-version = "0.1.0"
+version = "0.1.1"
 description = "Add your description here"
 authors = [
     { name = "hiroh", email = "hirohata0116@gmail.com" }
@@ -23,6 +23,7 @@ build-backend = "hatchling.build"
 managed = true
 dev-dependencies = [
     "pip>=24.2",
+    "twine>=5.1.1",
 ]
 
 [tool.hatch.metadata]
