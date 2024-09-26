@@ -42,14 +42,14 @@ def init_figure(num_axes: int, cfg):
 #=================================================================================
 def custom_plot(draw_config: list[DrawConfig],
                 out_path: str = None,
-                user_config: dict | None = None):
+                figure_config: dict | None = None):
     """
     Draw more detailed graph by using user-specified DrawConfig
     
     -------input-------
     draw_config (DrawConfig or list[DrawConfig]) > User-specified DrawConfig
     out_path (str or None) >  Output path of the image file. if None, no image file is output
-    user_config (dict) > Value to override PlotConfig.
+    figure_config (dict) > Value to override FigureConfig.
     
     -------output------
     None
@@ -58,7 +58,7 @@ def custom_plot(draw_config: list[DrawConfig],
     if isinstance(draw_config, list) == False:
         draw_config = [draw_config]
         
-    cfg = generate_local_config(user_config)
+    cfg = generate_local_config(figure_config)
     fig, ax_cols, ax_rows = init_figure(len(draw_config), cfg)
     
     for i, data in enumerate(draw_config, 1):
@@ -73,14 +73,14 @@ def custom_plot(draw_config: list[DrawConfig],
 #=================================================================================
 def lazy_plot(input_data: np.ndarray | list[np.ndarray], 
               out_path: str | None = None,
-              user_config: dict | None = None) :
+              figure_config: dict | None = None) :
     """
     Draw graphs by entering only data.
     
     -----input--------
     input_data (np.ndarray or list[np.ndarray]) > 
     out_path (str or None) >  Output path of the image file. if None, no image file is output
-    user_config (dict) > Value to override PlotConfig.
+    figure_config (dict) > Value to override FigureConfig.
     
     -------output------
     None
@@ -89,7 +89,7 @@ def lazy_plot(input_data: np.ndarray | list[np.ndarray],
     if isinstance(input_data, list) is False:
         input_data = [input_data]
     
-    cfg = generate_local_config(user_config)    # local config within this function
+    cfg = generate_local_config(figure_config)    # local config within this function
     fig, ax_cols, ax_rows = init_figure(len(input_data), cfg)
     
     for i, data in enumerate(input_data, 1):
