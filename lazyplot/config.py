@@ -15,7 +15,7 @@ LINE_STYLE = ['-', '--', '-.', ':']
 #=========================================================================
 @dataclass
 class FigureConfig:
-    figsize: tuple[int, int] = (8,8)
+    figsize: tuple[int, int] = (5, 4)
     layout: FIGURE_LAYOUT = "constrained"
     linewidth : float = 2.0
     columns: int = 1
