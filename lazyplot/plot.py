@@ -1,9 +1,11 @@
-import math
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
+from io import BytesIO
+from PIL import Image
+import math
 import numpy as np
 
-from lazyplot.config import FigureConfig, DrawConfig
+from lazyplot.config import FigureConfig, LazyAxes
 
 GLOBAL_CONFIG = FigureConfig()
 
@@ -39,36 +41,45 @@ def init_figure(num_axes: int, cfg):
     
     return fig, ax_cols, ax_rows
 
+
 #=================================================================================
-def custom_plot(draw_config: list[DrawConfig],
+def custom_plot(lazy_axes: list[LazyAxes],
                 out_path: str = None,
                 figure_config: dict | None = None):
     """
-    Draw more detailed graph by using user-specified DrawConfig
+    Draw more detailed graph by using user-specified LazyAxes
     
     -------input-------
-    draw_config (DrawConfig or list[DrawConfig]) > User-specified DrawConfig
+    lazy_axes (LazyAxes or list[LazyAxes]) > User-specified LazyAxes
     out_path (str or None) >  Output path of the image file. if None, no image file is output
     figure_config (dict) > Value to override FigureConfig.
     
     -------output------
-    None
+    img (PIL image data)
     
     """
-    if isinstance(draw_config, list) == False:
-        draw_config = [draw_config]
+    if isinstance(lazy_axes, list) == False:
+        lazy_axes = [lazy_axes]
         
     cfg = generate_local_config(figure_config)
-    fig, ax_cols, ax_rows = init_figure(len(draw_config), cfg)
+    fig, ax_cols, ax_rows = init_figure(len(lazy_axes), cfg)
     
-    for i, data in enumerate(draw_config, 1):
+    for i, data in enumerate(lazy_axes, 1):
         _ax = fig.add_subplot(ax_rows, ax_cols, i)
         plot_ax(_ax, data)
-        
+    
     if out_path is not None:
         fig.savefig(out_path, dpi=cfg.dpi)
+
+    #render PIL --------------------------
+    buf = BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    img = Image.open(buf)
+
+    plt.close(fig)
     
-    return
+    return img
 
 #=================================================================================
 def lazy_plot(input_data: np.ndarray | list[np.ndarray], 
@@ -83,7 +94,7 @@ def lazy_plot(input_data: np.ndarray | list[np.ndarray],
     figure_config (dict) > Value to override FigureConfig.
     
     -------output------
-    None
+    img (PIL image data)
     
     """
     if isinstance(input_data, list) is False:
@@ -95,17 +106,25 @@ def lazy_plot(input_data: np.ndarray | list[np.ndarray],
     for i, data in enumerate(input_data, 1):
         _title = f'data {i}'
         _ax = fig.add_subplot(ax_rows, ax_cols, i)
-        _draw_config = create_draw_config(data, _title, cfg)
+        _lazy_axes = create_lazy_axes(data, _title, cfg)
         
-        plot_ax(_ax, _draw_config)
+        plot_ax(_ax, _lazy_axes)
         
     if out_path is not None:
         fig.savefig(out_path, dpi=cfg.dpi)
+
+    #render PIL --------------------------
+    buf = BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    img = Image.open(buf)
+
+    plt.close(fig)
         
-    return
+    return img
         
 #====================================================================================
-def create_draw_config(data: np.ndarray, title: str, cfg: FigureConfig):
+def create_lazy_axes(data: np.ndarray, title: str, cfg: FigureConfig):
     
     if data.ndim == 1:
         plot_type = cfg.plot_type_1d
@@ -116,113 +135,109 @@ def create_draw_config(data: np.ndarray, title: str, cfg: FigureConfig):
     else:
         raise ValueError("Invalid data dimension. Data is limited to 3 dimensions or less")
     
-    draw_config = DrawConfig(y=data, plot_type=plot_type, title=title, linewidth=cfg.linewidth)
+    lazy_axes = LazyAxes(y=data, plot_type=plot_type, title=title, linewidth=cfg.linewidth)
     
-    return draw_config
+    return lazy_axes
 
 
 #=======================================================================================
-def plot_ax(ax: Axes, info: DrawConfig):
+def plot_ax(ax: Axes, data: LazyAxes):
     
     require_legend = False
     
-    match info.plot_type:
+    match data.plot_type:
         #-------------------------------------------------------------------------------
         case "plot":
-            if info.y.ndim > 2:
-                raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"plot\" require (N) or (M, N) data")
+            if data.y.ndim > 2:
+                raise ValueError(f"Invalid data shape: {data.y.shape}. plot_type: \"plot\" require (N) or (M, N) data")
             
-            if info.y.ndim == 1:
-                info.y = np.expand_dims(info.y, axis=0)
+            if data.y.ndim == 1:
+                data.y = np.expand_dims(data.y, axis=0)
                 
             #plot----------------------------------------
-            require_legend = True if len(info.y) != 1 else False
-            for i, y in enumerate(info.y):
-                _color = info.color[i % len(info.color)]
-                _linestyle = info.line_style[(i // len(info.color)) % len(info.line_style)]
-                _t = np.arange(len(y)) if info.t is None else info.t
-                _label = f"graph {i+1}" if info.labels is None else info.labels[i]
-                ax.plot(_t, y, label=_label, color=_color, alpha=info.alpha,
-                        linewidth=info.linewidth, linestyle=_linestyle)
+            require_legend = True if len(data.y) != 1 else False
+            for i, y in enumerate(data.y):
+                _color = data.color[i % len(data.color)]
+                _linestyle = data.line_style[(i // len(data.color)) % len(data.line_style)]
+                _t = np.arange(len(y)) if data.t is None else data.t
+                _label = f"graph {i+1}" if data.labels is None else data.labels[i]
+                ax.plot(_t, y, label=_label, color=_color, alpha=data.alpha,
+                        linewidth=data.linewidth, linestyle=_linestyle)
         #---------------------------------------------------------------------------------
         case "hist":
-            if info.y.ndim != 1:
-                raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"hist\" require (N) data")
-            ax.hist(info.y, color=info.color[0])
+            if data.y.ndim != 1:
+                raise ValueError(f"Invalid data shape: {data.y.shape}. plot_type: \"hist\" require (N) data")
+            ax.hist(data.y, color=data.color[0])
         #---------------------------------------------------------------------------------
         case "bar":
-            if info.y.ndim != 1:
-                raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"bar\" require (N) data")
-            label = [f"data {i + 1}" for i in range(len(info.y))] if info.labels is None else info.labels
-            color = [info.color[i % len(info.color)] for i in range(len(info.y))]
-            ax.bar(label, info.y, color=color)
+            if data.y.ndim != 1:
+                raise ValueError(f"Invalid data shape: {data.y.shape}. plot_type: \"bar\" require (N) data")
+            label = [f"data {i + 1}" for i in range(len(data.y))] if data.labels is None else data.labels
+            color = [data.color[i % len(data.color)] for i in range(len(data.y))]
+            ax.bar(label, data.y, color=color)
             
         #----------------------------------------------------------------------------------
         case "boxplot":
-            if info.y.ndim != 2:
-                raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"boxplot\" require (M, N) data")
+            if data.y.ndim != 2:
+                raise ValueError(f"Invalid data shape: {data.y.shape}. plot_type: \"boxplot\" require (M, N) data")
             
             #plot--------------------
-            label = [f"data {i + 1}" for i in range(len(info.y))] if info.labels is None else info.labels
-            color = [info.color[i & len(info.color)] for i in range(len(info.y))]
-            bplot = ax.boxplot(info.y.T, labels=label, patch_artist=True, medianprops=dict(color="white", linewidth=3))
+            label = [f"data {i + 1}" for i in range(len(data.y))] if data.labels is None else data.labels
+            color = [data.color[i & len(data.color)] for i in range(len(data.y))]
+            bplot = ax.boxplot(data.y.T, labels=label, patch_artist=True, medianprops=dict(color="white", linewidth=3))
             #paint facecolor
             for i, patch in enumerate(bplot['boxes']):
-                color = info.color[i % len(info.color)]
+                color = data.color[i % len(data.color)]
                 patch.set_facecolor(color)
             
         #----------------------------------------------------------------------------------
         case "scatter":
-            if info.y.ndim == 1 or info.y.ndim > 3:
-                raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"scatter\" require (M, 2, N) or (2, N) data")
-            elif info.y.ndim == 2:
-                info.y = np.expand_dims(info.y, axis=0)
+            if data.y.ndim == 1 or data.y.ndim > 3:
+                raise ValueError(f"Invalid data shape: {data.y.shape}. plot_type: \"scatter\" require (M, 2, N) or (2, N) data")
+            elif data.y.ndim == 2:
+                data.y = np.expand_dims(data.y, axis=0)
             
-            if info.y.shape[1] != 2:
+            if data.y.shape[1] != 2:
                 print("WARNING: cannot plot 3D data. z or higher dimension axis is ignored. Valid shape of data is (M, 2, N) or (2, N)")
             
             #plot-----------------------------------------
-            require_legend = True if len(info.y) != 1 else False
-            for i, y in enumerate(info.y):
-                _color = info.color[i % len(info.color)]
-                _markerstyle = info.marker_style[(i // len(info.color)) % len(info.marker_style)]
-                _label = f"graph {i+1}" if info.labels is None else info.labels[i]
-                ax.scatter(y[0], y[1], label=_label, color=_color, alpha=info.alpha,
-                        linewidth=info.linewidth, marker=_markerstyle)
+            require_legend = True if len(data.y) != 1 else False
+            for i, y in enumerate(data.y):
+                _color = data.color[i % len(data.color)]
+                _markerstyle = data.marker_style[(i // len(data.color)) % len(data.marker_style)]
+                _label = f"graph {i+1}" if data.labels is None else data.labels[i]
+                ax.scatter(y[0], y[1], label=_label, color=_color, alpha=data.alpha,
+                        linewidth=data.linewidth, marker=_markerstyle)
         #--------------------------------------------------------------------------------    
         case "imshow":
-            if info.y.ndim == 1 or info.y.ndim > 3:
-                raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"imshow\" require (M, N) or (M, N, 3[RGB] | 4[RGBA]) data")
+            if data.y.ndim == 1 or data.y.ndim > 3:
+                raise ValueError(f"Invalid data shape: {data.y.shape}. plot_type: \"imshow\" require (M, N) or (M, N, 3[RGB] | 4[RGBA]) data")
             
-            if info.y.ndim == 3:
-                if info.y.shape[2] != 3 and info.y.shape[2] != 4:
-                    raise ValueError(f"Invalid data shape: {info.y.shape}. plot_type: \"imshow\" require (M, N) or (M, N, 3[RGB] | 4[RGBA]) data")
+            if data.y.ndim == 3:
+                if data.y.shape[2] != 3 and data.y.shape[2] != 4:
+                    raise ValueError(f"Invalid data shape: {data.y.shape}. plot_type: \"imshow\" require (M, N) or (M, N, 3[RGB] | 4[RGBA]) data")
             
             #plot------------------------      
-            ax.imshow(info.y)           
+            ax.imshow(data.y)           
         #--------------------------------------------------------------------------------
         case _:
-            raise ValueError(f"Invalid plot_type: {info.plot_type}.")
+            raise ValueError(f"Invalid plot_type: {data.plot_type}.")
     
     
     # ax setting --------------------------------------
-    if info.title is not None:
-        ax.set_title(info.title)
-    ax.set_xlabel(info.x_label)
-    ax.set_ylabel(info.y_label)
-    ax.set_xlim(info.x_lim)
-    ax.set_ylim(info.y_lim)
-    ax.set_aspect(info.aspect)
+    if data.title is not None:
+        ax.set_title(data.title)
+    ax.set_xlabel(data.x_label)
+    ax.set_ylabel(data.y_label)
+    ax.set_xlim(data.x_lim)
+    ax.set_ylim(data.y_lim)
+    ax.set_aspect(data.aspect)
     
-    if info.invert_xaxis:
+    if data.invert_xaxis:
         ax.invert_xaxis()
-    if info.invert_yaxis:
+    if data.invert_yaxis:
         ax.invert_yaxis()
     if require_legend:   
         ax.legend()
     
 #=======================================================================
-
-if __name__ == "__main__":
-    
-    data = np.random.rand(30)

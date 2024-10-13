@@ -55,7 +55,7 @@ class FigureConfig:
 
 #======================================================================
 @dataclass
-class DrawConfig:
+class LazyAxes:
     
     y : np.ndarray  # require
     plot_type: PLOT_TYPE_1D | PLOT_TYPE_2D | PLOT_TYPE_3D   #require

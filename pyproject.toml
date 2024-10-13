@@ -1,13 +1,14 @@
 [project]
 name = "lazyplot"
-version = "0.1.3"
-description = "Add your description here"
+version = "0.1.5"
+description = "plot matplotlib graph easily"
 authors = [
     { name = "hiroh", email = "hirohata0116@gmail.com" }
 ]
 dependencies = [
     "matplotlib>=3.7.5",
     "numpy>=1.24.4",
+    "Pillow>=10.4.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

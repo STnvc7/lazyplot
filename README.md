@@ -9,7 +9,7 @@ pip install lazyplot
 
 ## usage
 ### lazy_plot
-Draw graphs by entering only data.
+Draw graphs by entering only np.ndarray data.
 ```
 from lazyplot import lazy_plot
 x = np.random.rand(3, 30)
@@ -20,10 +20,10 @@ lazy_plot(x, figure_config={"figsize"=(8,20), "colmuns"=2, "plot_type_2d"="plot"
 ```
 
 ### custom plot
-Draw more detailed graph by using user-specified DrawConfig
+Draw more detailed graph by using user-specified LazyAxes
 ```
-from lazyplot import DrawConfig, custom_plot
-draw_info = DrawConfig(y=np.random.rand(2,30), title="random value", plot_type="scatter", color="blue")
+from lazyplot import LazyAxes, custom_plot
+draw_info = LazyAxes(y=np.random.rand(2,30), title="random value", plot_type="scatter", color="blue")
 custom_plot(draw_info)
 ```
 
@@ -40,3 +40,26 @@ FigreConfig can be overridden by giving a dictionary-type configuration item to 
 - plot_type_3d ("scatter"): default plot type of 3 demensional array. (default= "scatter")
     
 - dpi (float) : dpi of matplotlib.Figure (default= 100)
+
+
+
+### LazyAxes
+
+- y (np.ndarray) \*REQUIRED
+- plot_type ("plot" | "hist" | "bar" | "scatter" | "imshow" | "boxplot") \*REQUIRED
+
+- title (str)
+- t (np.ndarray)
+- labels (list[str])
+- x_label (str)
+- y_label (str)
+- x_lim (tuple[float|None, float|None])
+- y_lim (tuple[float|None, float|None])
+- color (list[str | tuple[int, int, int]])
+- alpha (float)
+- line_style (list[str])
+- marker_style (list[str])
+- linewidth (float)
+- aspect (float | Literal["auto"])
+- invert_xaxis (bool)
+- invert_yaxis (bool)
