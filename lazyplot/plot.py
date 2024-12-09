@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from io import BytesIO
+from copy import deepcopy
 from PIL import Image
 import math
 import numpy as np
@@ -25,7 +26,7 @@ def generate_local_config(user_config):
     input: dict{ key of PlotConfig : value}
     output: PlotConfig override by user defined value 
     """
-    cfg = GLOBAL_CONFIG
+    cfg = deepcopy(GLOBAL_CONFIG)
     cfg.override(user_config)
     return cfg
 
